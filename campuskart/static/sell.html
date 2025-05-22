@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CampusKart - Sell Item</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      padding: 40px;
+    }
+    .form-box {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      width: 500px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    input, select, textarea, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #6e00ff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    button:hover {
+      background-color: #4b00cc;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-box">
+    <h2>Post an Item</h2>
+    <form id="sellForm" enctype="multipart/form-data">
+      <input type="text" name="name" placeholder="Item Name" required>
+      <input type="text" name="category" placeholder="Category" required>
+      <textarea name="description" placeholder="Description" required></textarea>
+      <input type="number" name="price" placeholder="Price (INR)" required>
+      <input type="text" name="sellerName" placeholder="Your Name" required>
+      <input type="text" name="sellerRole" placeholder="Your Role (Student/Worker)" required>
+      <input type="text" name="sellerCollege" placeholder="College" required>
+      <input type="text" name="sellerPhone" placeholder="Mobile Number" required>
+      <input type="text" name="condition" placeholder="Condition (New/Used)" required>
+      <input type="file" name="image" accept="image/*" required>
+      <button type="submit">Post Item</button>
+    </form>
+    <p id="msg" style="color: green; margin-top: 10px;"></p>
+  </div>
+
+  <script>
+    const form = document.getElementById('sellForm');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+
+      const res = await fetch('/api/products/add', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await res.json();
+      msg.textContent = result.message || 'Item posted!';
+      form.reset();
+    });
+  </script>
+</body>
+</html>

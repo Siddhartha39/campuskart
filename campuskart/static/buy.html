@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CampusKart - Buy Items</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #6e00ff;
+      margin-bottom: 30px;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .filters input,
+    .filters select {
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      width: 200px;
+    }
+
+    .filters input[type="number"] {
+      width: 100px;
+    }
+
+    .item-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .item-card {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      transition: 0.3s ease;
+      text-align: center;
+      position: relative;
+    }
+
+    .item-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .item-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 8px;
+      pointer-events: none;
+    }
+
+    .item-card h3 {
+      margin: 10px 0 5px;
+      color: #333;
+    }
+
+    .item-card p {
+      font-size: 14px;
+      color: #555;
+      margin: 5px 0;
+    }
+
+    .price {
+      font-weight: bold;
+      color: #6e00ff;
+    }
+
+    .item-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #6e00ff;
+      color: white;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #5000c2;
+    }
+
+    .video-ad {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .contact-info {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .call-btn, .chat-btn {
+      margin-top: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .call-btn {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .chat-btn {
+      background-color: #17a2b8;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Explore Items on CampusKart 🛒</h1>
+
+  <div class="filters">
+    <input type="text" id="searchInput" placeholder="Search items...">
+    <select id="collegeFilter">
+      <option value="">All Colleges</option>
+      <option value="PSIT">PSIT</option>
+      <option value="AKGEC">AKGEC</option>
+      <option value="KIET">KIET</option>
+    </select>
+    <select id="categoryFilter">
+      <option value="">All Categories</option>
+      <option value="Books & Notes">Books & Notes</option>
+      <option value="Electronics">Electronics</option>
+      <option value="Furniture">Furniture</option>
+      <option value="Clothing">Clothing</option>
+      <option value="Sports Equipment">Sports Equipment</option>
+      <option value="Other">Other</option>
+    </select>
+    <input type="number" id="minPrice" placeholder="Min ₹">
+    <input type="number" id="maxPrice" placeholder="Max ₹">
+  </div>
+
+  <div class="item-grid" id="itemsContainer">
+    <!-- Items will appear here -->
+  </div>
+
+  <script>
+    const itemsContainer = document.getElementById('itemsContainer');
+    const searchInput = document.getElementById('searchInput');
+    const collegeFilter = document.getElementById('collegeFilter');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const minPrice = document.getElementById('minPrice');
+    const maxPrice = document.getElementById('maxPrice');
+
+    let allItems = [];
+
+    async function loadItems() {
+      try {
+        const res = await fetch('/api/products/all');
+        const data = await res.json();
+        allItems = data;
+        displayItems(data);
+      } catch (error) {
+        itemsContainer.innerHTML = '<p>Failed to load items.</p>';
+      }
+    }
+
+    function displayItems(items) {
+      itemsContainer.innerHTML = '';
+
+      if (items.length === 0) {
+        itemsContainer.innerHTML = '<p>No items match your filters.</p>';
+        return;
+      }
+
+      items.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'item-card';
+        div.innerHTML = `
+          <img src="${item.imageUrl}" alt="${item.name}">
+          <h3>${item.name}</h3>
+          <p>${item.category}</p>
+          <p class="price">₹${item.price}</p>
+          <p>${item.condition}</p>
+          <p><strong>${item.sellerCollege}</strong></p>
+
+          <div class="item-actions">
+            <button class="btn" onclick="alert('More details: ${item.description}')">More Details</button>
+            <button class="btn" onclick="playAd(${index})">Contact</button>
+          </div>
+
+          <div class="video-ad" id="ad-${index}">
+            <video width="100%" controls autoplay muted onended="showContact(${index}, '${item.sellerPhone}')">
+              <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+              Your browser does not support HTML video.
+            </video>
+          </div>
+
+          <div class="contact-info" id="contact-${index}">
+            <p><strong>Contact:</strong> ${item.sellerPhone}</p>
+            <button class="call-btn" onclick="window.location.href='tel:${item.sellerPhone}'">📞 Call</button>
+            <button class="chat-btn" onclick="startChat('${item.sellerName}', '${item.sellerPhone}')">💬 Chat</button>
+          </div>
+        `;
+        itemsContainer.appendChild(div);
+      });
+    }
+
+    function playAd(index) {
+      document.getElementById(`ad-${index}`).style.display = 'block';
+    }
+
+    function showContact(index, phone) {
+      document.getElementById(`ad-${index}`).style.display = 'none';
+      document.getElementById(`contact-${index}`).style.display = 'block';
+    }
+
+    function startChat(name, phone) {
+      alert(`Starting chat with ${name} (${phone})`);
+      // You can replace this with a real chat window later
+    }
+
+    function filterItems() {
+      const search = searchInput.value.toLowerCase();
+      const college = collegeFilter.value;
+      const category = categoryFilter.value;
+      const min = parseInt(minPrice.value) || 0;
+      const max = parseInt(maxPrice.value) || Infinity;
+
+      const filtered = allItems.filter(item => {
+        return (
+          (!college || item.sellerCollege.includes(college)) &&
+          (!category || item.category === category) &&
+          (item.name.toLowerCase().includes(search) || item.description.toLowerCase().includes(search)) &&
+          item.price >= min &&
+          item.price <= max
+        );
+      });
+
+      displayItems(filtered);
+    }
+
+    searchInput.addEventListener('input', filterItems);
+    collegeFilter.addEventListener('change', filterItems);
+    categoryFilter.addEventListener('change', filterItems);
+    minPrice.addEventListener('input', filterItems);
+    maxPrice.addEventListener('input', filterItems);
+
+    loadItems();
+  </script>
+
+</body>
+</html>
